@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看商品</title>
+    <link rel="stylesheet" href="/home/public/static/css/layui.css">
+</head>
+<body>
+<form class="layui-form">
+    <div class="layui-inline">
+        <label class="layui-form-label">分类id</label>
+        <div class="layui-input-inline" style="width: 100px;" >
+            <select name="cid" lay-verify="">
+                <option value="">请选择一个分类</option>
+                {volist name="cates" id="vo"}
+                <option value="{$vo.id}">{$vo.cname}</option>
+                {/volist}
+            </select>
+        </div>
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label">商品名称</label>
+        <div class="layui-input-inline" style="width: 100px;">
+            <input type="text" name="gname" placeholder="关键字" autocomplete="off" class="layui-input">
+        </div>
+        <!--<div class="layui-form-mid">-</div>-->
+    </div>
+    <div class="layui-inline">
+        <label class="layui-form-label">价格范围</label>
+        <div class="layui-input-inline" style="width: 100px;">
+            <input type="text" name="price_min" placeholder="￥" autocomplete="off" class="layui-input">
+        </div>
+        <div class="layui-form-mid">-</div>
+        <div class="layui-input-inline" style="width: 100px;">
+            <input type="text" name="price_max" placeholder="￥" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <button class="layui-btn" lay-submit lay-filter="ss">搜索</button>
+</form>
+<table id="demo" lay-filter="test"></table>
+<table class="layui-hide" id="test" lay-filter="test"></table>
+
+</body>
+</html>
+<script src="/home/public/static/layui.js"></script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="bannerTP1">
+    {{#  let arr=d.gbanner.split(',') }}
+    {{# arr.forEach(ele=>{ }}
+    <img src="{{ele}}" alt="" width="80px">
+    {{# }) }}
+</script>
+<script>
+    const Home='/home/public/admin/goods/';
+    layui.use(['table','layer','form'], function(){
+        var table = layui.table,$ = layui.$,form=layui.form;
+        //第一个实例
+        let tableIns=table.render({
+            elem: '#demo'
+            ,height: 312
+            ,url: Home+'query' //数据接口
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            //页数(总数，每页条数)
+            //页码 page 几条limit
+            // xxxxx?page=1&limit=3;
+            ,cols: [[ //表头
+                {edit: 'text', field: 'id', title: 'id', width:80, sort: true, fixed: 'left'}
+                ,{edit: 'text',field: 'gname', title: '商品名称', width:180}
+                ,{edit: 'text',field: 'gthumb', title: '缩略图', width:180,templet:function (d) {
+                        return"<img src='"+d.gthumb+"'>"
+                    }}
+                ,{edit: 'text',field: 'gmprice', title: '市场价格', width:80}
+                ,{edit: 'text',field: 'sele', title: '零售价', width: 177}
+                ,{edit: 'text',field: 'gstock', title: '库存量', width:180}
+                ,{edit: 'text',field: 'gbanner', title: '轮播图', width:80,templet:"#bannerTP1"}
+                ,{edit: 'text',field: 'gdetail', title: '商品详情', width: 177}
+                ,{edit: 'text',field: 'create_time', title: '上架时间', width:80}
+                ,{edit: 'text',field: 'cid', title: '商品分类', width: 177}
+                ,{edit: 'text',fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+            ]]
+            ,page: true,
+            limit:3,
+        });
+        //搜索
+        form.on('submit(ss)',function (data) {
+            let  field=data.field;
+            tableIns.reload({
+                // url:Home+'query',
+                where: {field}
+                ,page: {
+                    curr: 1 //重新从第 1 页开始
+                }
+            });
+            return false;
+        });
+
+        //监听行工具事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            let id=data.id;
+            console.log(id)
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(){
+                    obj.del();
+                    layer.close();
+                    $.ajax({
+                        type: 'POST',
+                        url: Home+'delete',
+                        dataType: 'json',
+                        data: {'id':id},
+                        success: function (res) {
+                            // layer.msg('hello');
+                            layer.alert(res.msg);
+                        }
+                    });
+                    return false;
+                });
+            } else if(obj.event === 'edit'){
+                layer.prompt({
+                    formType: 2
+                    ,value: data.email
+                }, function(value, ){
+                    obj.update({
+                        email: value
+                    });
+                    layer.close();
+                });
+            }
+        });
+        //监听单元格编辑
+        table.on('edit(test)', function(obj){
+            var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field; //得到字段
+            layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+            // layer.open({
+            //     type: 3,
+            //     icon:1
+            // }
+            // );
+            let index=layer.load(2);
+            $.ajax({
+                type: 'POST',
+                url: Home+'add',
+                dataType: 'json',
+                data: {'value':value,'id':data.id,'field':field},
+                success: function (res) {
+                    // layer.msg('hello');
+                    layer.alert(res.msg);
+                    layer.close(index)
+                }
+            });
+            return false;
+        });
+    });
+</script>

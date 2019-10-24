@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+    <link rel="stylesheet" href="/home/public/static/css/layui.css">
+
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">序号</label>
+        <div class="layui-input-block">
+            <input type="text"  lay-verify="required||name" name="id"   lay-verify="required" placeholder="请输入导航名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品分类</label>
+        <div class="layui-input-block">
+            <input type="text"  lay-verify="required||ename" name="cname"  lay-verify="required" placeholder="请输入英文名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+</body>
+<script src="/home/public/static/layui.js"></script>
+<script>
+    const HOME='/home/public/admin/clas/';
+    layui.use(['form','layer'], function () {
+    let form = layui.form, $ = layui.$;
+    form.on('submit(*)', function (data) {
+    // layer.msg(JSON.stringify(data.field));
+    let qs = data.field;
+    $.ajax({
+    type: 'POST',
+    url: HOME+'insert',
+    dataType: 'json',
+    data: qs,
+    success: function (res) {
+    // layer.msg('hello');
+    layer.alert(res.msg);
+}
+})
+    return false;
+});
+    });
+</script>

@@ -1,0 +1,71 @@
+{include file='public/header' title=$title/}
+<link rel="stylesheet" href="__CSS_PATH__fwxm.css">
+
+
+
+<!-- 头部的黑色边框结束 -->
+<!-- 大图片的开始 -->
+<div class="container">
+    <div class="row">
+        <div class="picture1 col-lg-12 col-md-12  col-sm-12 col-xs-12">
+            <img src="__IMG_PATH__service/tim.jpg" alt="">
+        </div>
+    </div>
+</div>
+<!-- 大图片的结束 -->
+<!-- 标题的开始 -->
+<div class="container">
+    <div class="row">
+        <div class="big-box">
+            <div class="tittle-left col-lg-5 col-md-5 col-sm-5 col-xs-4">
+
+            </div>
+            <div class="tittle col-lg-2 col-md-2 col-sm-2 col-xs-4">
+                    <span class="tiittle-cn">
+
+                                </span>
+                <span class="tittle-en">
+
+                                </span>
+            </div>
+            <div class="tittle-right col-lg-5 col-md-5 col-sm-5 col-xs-4">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 标题的结束 -->
+<!-- 主体部分的开始 -->
+<div class="subject">
+    <div class="container">
+        <div class="row">
+            {volist name='service', id="data"}
+            <div class="frame animate fadeInUp col-lg-3 col-md-3 col-sm-12 col-xs-12">
+
+                <img src="{$data.simg}" alt="">
+                <div class="wenzi">
+                    <a href="#">
+                        <span>{$data.sname}</span>
+                    </a>
+                </div>
+                <div class="henghang">
+                    <img  src="__IMG_PATH__service/横线.png" alt="">
+                </div>
+                <div class="word">
+                    <span>{$data.scontent}</span>
+                </div>
+
+            </div>
+            {/volist}
+
+        </div>
+    </div>
+</div>
+
+<!-- 底部部分的结束 -->
+{include file='public/top'/}
+</body>
+
+</html>
+
+<script src="__JS_PATH__com.js"></script>

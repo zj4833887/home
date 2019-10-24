@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+    <link rel="stylesheet" href="/home/public/static/css/layui.css">
+
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">人员名字</label>
+        <div class="layui-input-block">
+            <input type="text"  name="pname" lay-verify="required" placeholder="请输入人员名字"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">人员介绍</label>
+        <div class="layui-input-block">
+            <input type="text"  name="pcontent" lay-verify="required" placeholder="请输入人员介绍"
+                   autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">缩略图</label>
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn" id="test1">上传图片</button>
+            <div class="layui-upload-list">
+                <img class="layui-upload-img" id="demo1" style="width: 100px">
+                <p id="demoText"></p>
+                <input type="text" name="simg" placeholder="请输入详情" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+</body>
+<script src="/home/public/static/layui.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script>
+    const HOME = '/home/public/index.php'
+    layui.use(['form', 'layer', 'upload', 'layedit'], function () {
+        let {$, upload, form, layedit} = layui;
+        form.on('submit(*)', function (data) {
+            // layer.msg(JSON.stringify(data.field));
+            let qs = data.field;
+            delete qs.file;
+            $.ajax({
+                type: 'POST',
+                url: HOME+'/admin/personnel/insert',
+                dataType: 'json',
+                data: qs,
+                success: function (res) {
+                    // layer.msg('hello');
+                    layer.alert(res.msg);
+                }
+            })
+            return false;
+        });
+        form.verify({
+            name: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (!new RegExp("^[a-zA-Z0-9_\u4e00-\u9fa5\\s·]+$").test(value)) {
+                    return '标题不能有特殊字符';
+                }
+                if (/(^\_)|(\__)|(\_+$)/.test(value)) {
+                    return '标题首尾不能出现下划线\'_\'';
+                }
+                if (/^\d+\d+\d$/.test(value)) {
+                    return '标题不能全为数字';
+                }
+            },
+            content: [/^[a-zA-Z][a-zA-Z]{2,14}$/, '请输入3-15位英文字母'],
+            //我们既支持上述函数式的方式，也支持下述数组的形式
+            //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+        });
+        let uploadInst = upload.render({
+            elem: '#test1'
+            , url: HOME + '/admin/upload/index'
+            , accept: 'images'
+            , acceptMime: 'image/*'
+            , size: 500
+            , before: function (obj) {
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                //如果上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                } else {
+                    // console.log($('#img-gthumb').val(res.data.src));
+                    // $('#gthumb').val(res.data.src);
+                    $('#gthumb').attr('src', res.data.src)
+                    $('input[name=simg]').val(res.data.src)
+                }
+                //上传成功
+            },
+        });
+    });
+</script>
